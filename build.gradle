@@ -1,0 +1,85 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.5'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id "org.asciidoctor.jvm.convert" version "3.3.2"
+	id 'java'
+}
+
+configurations {
+	asciidoctorExt
+}
+
+group = 'project'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'mysql:mysql-connector-java'
+
+	// handlebars
+	implementation 'pl.allegro.tech.boot:handlebars-spring-boot-starter:0.3.0'
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	implementation 'org.mariadb.jdbc:mariadb-java-client'
+
+	// handlebars
+	implementation 'pl.allegro.tech.boot:handlebars-spring-boot-starter:0.3.0'
+
+	// embedded redis
+	implementation 'it.ozimov:embedded-redis:0.7.2'
+
+	// rest docs
+	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.5.RELEASE'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-restassured:2.0.5.RELEASE'
+	testImplementation 'io.rest-assured:rest-assured:3.3.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-test'
+}
+
+ext {
+	snippetsDir = file('build/generated-snippets')
+}
+
+test {
+	useJUnitPlatform()
+}
+
+task testDocument(type: Test) {
+	useJUnitPlatform()
+	filter {
+		includeTestsMatching "*.documentation.*"
+	}
+}
+
+// API 문서 생성
+asciidoctor {
+	inputs.dir snippetsDir
+	configurations 'asciidoctorExt'
+	dependsOn testDocument
+}
+
+bootJar {
+	dependsOn asciidoctor
+	from ("${asciidoctor.outputDir}/html5") {
+		into 'static/docs'
+	}
+}
+
+task copyDocument(type: Copy) {
+	dependsOn asciidoctor
+
+	from file("build/docs/asciidoc")
+	into file("src/main/resources/static/docs")
+}

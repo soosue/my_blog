@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    include: oauth,real-db
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+  messages:
+    basename: errors
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB106Dialect
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MariaDB106Dialect
+  redis:
+    port: 6379
+    host: localhost
+
+logging:
+  level:
+    org.hibernate.SQL: info # 로거로 찍기 때문에 사용하자.
+    org.hibernate.type: info # query parameter 보여줌.
+    project: info
